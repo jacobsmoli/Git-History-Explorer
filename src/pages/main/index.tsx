@@ -1,32 +1,48 @@
 import React, { useState, useEffect } from 'react';
 import Axios from 'axios';
 import { GitAuthor, GitCommit, GitCommitter } from './type';
-import { Container, Row, Spinner, Table } from 'react-bootstrap';
+import { Container, Row, Spinner, Table, Alert } from 'react-bootstrap';
+import Header from './components/header';
+import HistoryTable from './components/historyTable';
 
 import cls from './main.module.scss';
 
 export type MainPageProps = {};
 
 const Main = (props: MainPageProps) => {
-  const [gitHistory, setGitHistory] = useState<GitCommit | null>(null);
+  const [gitHistory, setGitHistory] = useState<GitCommit[] | undefined>(
+    undefined
+  );
   const [isLoading, setLoading] = useState(false);
+  const [error, setError] = useState(undefined);
 
   useEffect(() => {
     if (isLoading) {
       return;
     }
+  }, []);
+
+  const loadHistory = () => {
+    setError(undefined);
     setLoading(true);
     Axios.get(
       'https://api.github.com/repos/jacobsmoli/Git-History-Explorer/commits'
     )
-      .then((res) => {
+      .then(({ data }) => {
         // setLoading(false);
-        console.log('~~~~~~~` res', res);
+        console.log('~~~~~~~` res', data);
+        setGitHistory(data);
       })
       .catch((err) => {
-        // setLoading(false);
+        setLoading(false);
+        setError(err);
+        setGitHistory(undefined);
       });
-  }, []);
+  };
+
+  const handleClickRefresh = (e: any) => {
+    loadHistory();
+  };
 
   if (isLoading) {
     return (
@@ -38,42 +54,14 @@ const Main = (props: MainPageProps) => {
 
   return (
     <Container>
-      <Row>
-        <header className='App-header'>
-          <p>This is git history explorer!</p>
-        </header>
-      </Row>
-      <Row>
-        <Table striped bordered hover>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>Username</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>1</td>
-              <td>Mark</td>
-              <td>Otto</td>
-              <td>@mdo</td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td>Jacob</td>
-              <td>Thornton</td>
-              <td>@fat</td>
-            </tr>
-            <tr>
-              <td>3</td>
-              <td colSpan='2'>Larry the Bird</td>
-              <td>@twitter</td>
-            </tr>
-          </tbody>
-        </Table>
-      </Row>
+      <Header onClick={handleClickRefresh} />
+      {error ? (
+        <Row className={cls.notFoundWrapper}>
+          <Alert variant='danger'>Could not found history!</Alert>
+        </Row>
+      ) : (
+        <HistoryTable data={gitHistory} />
+      )}
     </Container>
   );
 };
