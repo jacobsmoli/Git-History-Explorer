@@ -20,6 +20,7 @@ const Main = (props: MainPageProps) => {
     if (isLoading) {
       return;
     }
+    loadHistory();
   }, []);
 
   const loadHistory = () => {
@@ -32,6 +33,7 @@ const Main = (props: MainPageProps) => {
         // setLoading(false);
         console.log('~~~~~~~` res', data);
         setGitHistory(data);
+        setLoading(false);
       })
       .catch((err) => {
         setLoading(false);

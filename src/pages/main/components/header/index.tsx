@@ -10,11 +10,8 @@ export type HeaderProps = {
 const Header = (props: HeaderProps) => {
   return (
     <Row className={cls.headerWrapper}>
-      <header className='App-header'>
-        <p>This is git history explorer!</p>
-      </header>
       <Button variant='primary' onClick={props.onClick}>
-        Primary
+        Refresh
       </Button>
     </Row>
   );
